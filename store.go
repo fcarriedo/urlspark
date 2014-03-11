@@ -28,6 +28,9 @@ func init() {
 			return err
 		},
 	}
+
+	// Test connectivity & fail fast
+	testConnectivity()
 }
 
 // Persists the given URL and returns the unique ID that references it
@@ -76,4 +79,13 @@ func genRandID(length int) string {
 		bytes[i] = alphanum[b%byte(len(alphanum))]
 	}
 	return string(bytes)
+}
+
+// Test the connectivity with the redis datastore and fail fast
+func testConnectivity() {
+	conn := pool.Get()
+	defer conn.Close()
+
+	// Do a simple PING and make it fail (if) on connection create.
+	conn.Do("PING")
 }
