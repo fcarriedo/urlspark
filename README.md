@@ -3,14 +3,6 @@
 Quick and dirty URL shortener that creates volatile (read *short lived*)
 shortened URLs.
 
-### Dependencies
-
-The only dependency is on [redis](http://redis.io/) which works as its
-datastore.
-
-The service expects the redis server to be running and reachable to be able to
-perform its main operations.
-
 ### Installing it
 
 You need [golang](http://golang.org/) installed with the GOPATH set.
@@ -41,6 +33,7 @@ would look like the following:
 ```
   $ urlspark -p 8080 -exp 30 -redis "myredishost:6399"
 ```
+
 ### Using it
 
 To generate a shortened short lived URL just POST a long URL to the base.
@@ -66,6 +59,17 @@ expires:
 ```
 
 ...and the resource should cease to exist.
+
+### Dependencies
+
+The only dependency is on [redis](http://redis.io/) which works as its
+datastore. Redis seems to make the most sense due to the nature of the app
+(key, value, expiration) in addition to its blazing speed. Other datastores can
+be implemented but expiration might need to be added if not an inherent
+property of the backing datastore.
+
+The service expects the redis server to be running and reachable from the
+server to be able to perform its main operations.
 
 ### License
 
