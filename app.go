@@ -9,10 +9,20 @@ import (
 )
 
 var (
-	port           = flag.Int("p", 80, "http port to run")
-	expirationSecs = flag.Int("exp", 60, "The expiration time [seconds]")
-	redisAddr      = flag.String("redis", "localhost:6379", "redis address 'host:port'")
+	port      = flag.Int("p", 80, "http port to run")
+	expSecs   = flag.Int("exp", 60, "The expiration time [seconds]")
+	redisAddr = flag.String("redis", "localhost:6379", "redis address 'host:port'")
 )
+
+var store urlStore
+
+func init() {
+	var err error
+	if store, err = NewStore(*redisAddr); err != nil {
+		// Fail fast if no datastore at startup
+		log.Fatal(err)
+	}
+}
 
 func creationHandler(w http.ResponseWriter, req *http.Request) {
 	switch req.Method {
@@ -25,8 +35,9 @@ func creationHandler(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		id, err := persistURL(url)
+		id, err := store.persist(url, *expSecs)
 		if err != nil {
+			log.Println(err)
 			http.Error(w, "The server experienced an error", http.StatusInternalServerError)
 			return
 		}
@@ -42,14 +53,15 @@ func redirectHandler(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
 	switch req.Method {
 	case "GET":
-		url, err := getURL(id)
+		url, err := store.get(id)
 		if err != nil {
+			log.Println(err)
 			http.Error(w, "The requested URL has expired and/or does not exist", http.StatusNotFound)
 			return
 		}
 		http.Redirect(w, req, url, http.StatusFound)
 	case "DELETE":
-		deleteURL(id)
+		store.del(id)
 	default:
 		handleErr(w, http.StatusMethodNotAllowed)
 	}

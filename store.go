@@ -2,23 +2,38 @@ package main
 
 import (
 	"crypto/rand"
+	"fmt"
 	"github.com/garyburd/redigo/redis"
-	"log"
 	"time"
 )
 
 const alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+const idLen = 4
 
-var pool *redis.Pool
+// The interface definition for the URL datastore
+type urlStore interface {
+	// Persist the given URL for the given amount of sec and returns the stored
+	// URL identifier
+	persist(longUrl string, expSec int) (string, error)
+	// Gets the stored URL given the identifier
+	get(id string) (string, error)
+	// Deletes the URL given the identifier
+	del(id string) error
+}
 
-func init() {
-	pool = &redis.Pool{
+type redisStore struct {
+	pool *redis.Pool
+}
+
+// Creates a new URL datastore
+func NewStore(addr string) (*redisStore, error) {
+	pool := &redis.Pool{
 		MaxIdle:     5,
 		IdleTimeout: 240 * time.Second,
 		Dial: func() (redis.Conn, error) {
-			conn, err := redis.Dial("tcp", *redisAddr)
+			conn, err := redis.Dial("tcp", addr)
 			if err != nil {
-				log.Fatalf("redis is unreachabe at '%s'", *redisAddr)
+				err := fmt.Errorf("redis is unreachable: %s", err)
 				return nil, err
 			}
 			return conn, nil
@@ -29,23 +44,29 @@ func init() {
 		},
 	}
 
-	// Test connectivity & fail fast
-	testConnectivity()
+	s := &redisStore{pool: pool}
+
+	// Test basic connectivity
+	if err := s.ping(); err != nil {
+		return nil, err
+	}
+
+	return s, nil
 }
 
 // Persists the given URL and returns the unique ID that references it
-func persistURL(longURL string) (string, error) {
+func (s *redisStore) persist(longURL string, expSec int) (string, error) {
 	for {
-		conn := pool.Get()
+		conn := s.pool.Get()
 		defer conn.Close()
 
-		id := genRandID(4)
+		id := genRandID(idLen)
 
 		if exists, _ := redis.Bool(conn.Do("EXISTS", id)); !exists {
 			// If not existent in redis, SET it with with the expiration window
 			conn.Send("MULTI")
 			conn.Send("SET", id, longURL)
-			conn.Send("EXPIRE", id, *expirationSecs)
+			conn.Send("EXPIRE", id, expSec)
 			if _, err := conn.Do("EXEC"); err != nil {
 				return "", err
 			}
@@ -55,20 +76,28 @@ func persistURL(longURL string) (string, error) {
 	}
 }
 
-// Gets the URL associated with the given ID
-func getURL(id string) (string, error) {
-	conn := pool.Get()
+func (s *redisStore) get(id string) (string, error) {
+	conn := s.pool.Get()
 	defer conn.Close()
 
 	return redis.String(conn.Do("GET", id))
 }
 
-// Deletes the URL associated with the given ID
-func deleteURL(id string) {
-	conn := pool.Get()
+func (s *redisStore) del(id string) error {
+	conn := s.pool.Get()
 	defer conn.Close()
 
-	conn.Do("DEL", id)
+	_, err := conn.Do("DEL", id)
+	return err
+}
+
+// Do PING. Useful for connectivity and isAlive?
+func (s *redisStore) ping() error {
+	conn := s.pool.Get()
+	defer conn.Close()
+
+	_, err := conn.Do("PING")
+	return err
 }
 
 // Generates a random ID of the given length
@@ -79,13 +108,4 @@ func genRandID(length int) string {
 		bytes[i] = alphanum[b%byte(len(alphanum))]
 	}
 	return string(bytes)
-}
-
-// Test the connectivity with the redis datastore and fail fast
-func testConnectivity() {
-	conn := pool.Get()
-	defer conn.Close()
-
-	// Do a simple PING and make it fail (if) on connection create.
-	conn.Do("PING")
 }
