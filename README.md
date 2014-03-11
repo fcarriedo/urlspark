@@ -71,6 +71,10 @@ property of the backing datastore.
 The service expects the redis server to be running and reachable from the
 server to be able to perform its main operations.
 
+### TODO
+
+  * Think about implementing **single use URLs**
+
 ### License
 
 urlspark is available under the [Apache License, Version
