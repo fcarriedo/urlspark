@@ -60,7 +60,6 @@ func redirectHandler(w http.ResponseWriter, req *http.Request) {
 	case "GET":
 		url, err := store.get(id)
 		if err != nil {
-			log.Println(err)
 			http.Error(w, "The requested URL has expired and/or does not exist", http.StatusNotFound)
 			return
 		}
