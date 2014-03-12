@@ -11,16 +11,21 @@ import (
 var (
 	port      = flag.Int("p", 80, "http port to run")
 	expSecs   = flag.Int("exp", 60, "The expiration time [seconds]")
-	redisAddr = flag.String("redis", "localhost:6379", "redis address 'host:port'")
+	redisAddr = flag.String("redis", "", "redis address 'host:port'")
 )
 
 var store urlStore
 
 func init() {
-	var err error
-	if store, err = NewStore(*redisAddr); err != nil {
-		// Fail fast if no datastore at startup
-		log.Fatal(err)
+	if *redisAddr != "" {
+		// If redis param given, init the store with it.
+		var err error
+		if store, err = NewRedisStore(*redisAddr); err != nil {
+			// Fail fast if no datastore at startup
+			log.Fatal(err)
+		}
+	} else {
+		store = NewMemoryStore()
 	}
 }
 
