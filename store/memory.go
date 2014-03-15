@@ -27,10 +27,9 @@ func (db *memStore) Persist(longURL string, ttl int) (string, error) {
 			// If not existent SET it with with the expiration window
 			db.m[id] = longURL
 			// launch the expiration routine
-			go func() {
-				<-time.After(time.Duration(ttl) * time.Second)
+			time.AfterFunc(time.Duration(ttl)*time.Second, func() {
 				db.Del(id)
-			}()
+			})
 
 			return id, nil
 		}
