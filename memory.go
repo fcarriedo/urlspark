@@ -16,7 +16,7 @@ func NewMemoryStore() *memStore {
 }
 
 // Persists the given URL and returns the unique ID that references it
-func (db *memStore) persist(longURL string, expSec int) (string, error) {
+func (db *memStore) persist(longURL string, ttl int) (string, error) {
 	db.Lock()
 	defer db.Unlock()
 
@@ -28,7 +28,7 @@ func (db *memStore) persist(longURL string, expSec int) (string, error) {
 			db.m[id] = longURL
 			// launch the expiration routine
 			go func() {
-				<-time.After(time.Duration(expSec) * time.Second)
+				<-time.After(time.Duration(ttl) * time.Second)
 				db.del(id)
 			}()
 

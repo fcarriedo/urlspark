@@ -40,7 +40,7 @@ func NewRedisStore(addr string) (*redisStore, error) {
 }
 
 // Persists the given URL and returns the unique ID that references it
-func (s *redisStore) persist(longURL string, expSec int) (string, error) {
+func (s *redisStore) persist(longURL string, ttl int) (string, error) {
 	for {
 		conn := s.pool.Get()
 		defer conn.Close()
@@ -51,7 +51,7 @@ func (s *redisStore) persist(longURL string, expSec int) (string, error) {
 			// If not existent in redis, SET it with with the expiration window
 			conn.Send("MULTI")
 			conn.Send("SET", id, longURL)
-			conn.Send("EXPIRE", id, expSec)
+			conn.Send("EXPIRE", id, ttl)
 			if _, err := conn.Do("EXEC"); err != nil {
 				return "", err
 			}

@@ -11,7 +11,7 @@ const idLen = 4
 type urlStore interface {
 	// Persist the given URL for the given amount of sec and returns the stored
 	// URL identifier
-	persist(longUrl string, expSec int) (string, error)
+	persist(longUrl string, ttl int) (string, error)
 	// Gets the stored URL given the identifier
 	get(id string) (string, error)
 	// Deletes the URL given the identifier

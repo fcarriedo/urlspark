@@ -10,7 +10,7 @@ import (
 
 var (
 	port      = flag.Int("p", 80, "http port to run")
-	expSecs   = flag.Int("exp", 60, "The expiration time [seconds]")
+	ttl       = flag.Int("ttl", 60, "The expiration time [time to live seconds]")
 	redisAddr = flag.String("redis", "", "redis address 'host:port'")
 )
 
@@ -40,7 +40,7 @@ func creationHandler(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		id, err := store.persist(url, *expSecs)
+		id, err := store.persist(url, *ttl)
 		if err != nil {
 			log.Println(err)
 			http.Error(w, "The server experienced an error", http.StatusInternalServerError)
