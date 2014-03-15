@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"os"
 )
 
 var (
@@ -28,6 +29,13 @@ func init() {
 		}
 	} else {
 		ds = store.NewMemoryStore()
+	}
+
+	// Flags usage
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage:  %v [options]\n\n", os.Args[0])
+		fmt.Fprintln(os.Stderr, "Starts a URL shortener server\n")
+		flag.PrintDefaults()
 	}
 }
 

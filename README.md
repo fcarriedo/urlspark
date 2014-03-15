@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/fcarriedo/urlspark.png?branch=master)](https://travis-ci.org/fcarriedo/urlspark)
-
 # urlspark
+
+[![Build Status](https://travis-ci.org/fcarriedo/urlspark.png?branch=master)](https://travis-ci.org/fcarriedo/urlspark)
 
 Quick and dirty URL shortener that creates volatile (read *short lived*)
 shortened URLs.
@@ -17,23 +17,14 @@ Just get it!
 
 ### Running it
 
-Running:
-
 ```
-  $ urlspark
-```
+Usage:  urlspark [options]
 
-The previous runs the service with the following defaults:
+Starts a URL shortener server
 
-  * `p := 80` - Runs the service on port **80**
-  * `exp := 60` - Every generated short URL expires in **60 seconds**
-  * `redis := localhost:6379` - Redis server expected on **localhost:6379**
-
-You can customize any of the previous parameters. A fully customized startup
-would look like the following:
-
-```
-  $ urlspark -p 8080 -exp 30 -redis "myredishost:6399"
+  -p=80: http port to run
+  -redis="": redis address 'host:port'
+  -ttl=60: The expiration time [time to live seconds]
 ```
 
 ### Using it
