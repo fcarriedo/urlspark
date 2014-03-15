@@ -34,7 +34,7 @@ func init() {
 	// Flags usage
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage:  %v [options]\n\n", os.Args[0])
-		fmt.Fprintln(os.Stderr, "Starts a URL shortener server\n")
+		fmt.Fprintf(os.Stderr, "Starts a URL shortener server\n\n")
 		flag.PrintDefaults()
 	}
 }
