@@ -11,9 +11,7 @@ You need [golang](http://golang.org/) installed with the GOPATH set.
 
 Just get it!
 
-```
-  $ go get github.com/fcarriedo/urlspark
-```
+    $ go get github.com/fcarriedo/urlspark
 
 ### Running it
 
@@ -26,6 +24,11 @@ Starts a URL shortener server
   -redis="": redis address 'host:port'
   -ttl=60: The expiration time [time to live seconds]
 ```
+
+By default, it doesn't have any infrastructure dependencies and uses an *in
+memory* datastore. If `-redis=host:port` is specified then it will try to
+connect to [redis](http://redis.io/) and use it its datastore. **A redis
+datastore might be the best suited for production deployments.**
 
 ### Using it
 
@@ -41,32 +44,15 @@ You should get the shortened URL as a response.
 Now point your browser to the generated URL: `http://urlsparkhost/pK7z`. It
 should redirect you to `http://ahost.com/and/very/long/url?param=some&key=val`
 
-The shortened URL should exist for as long as `exp` seconds (*60 sec by
+The shortened URL should exist for as long as `ttl` seconds (*60 sec by
 default*)
 
 If by any means you need to delete the generated shortened URL before it
 expires:
 
-```
-  $ curl -X DELETE http://urlsparkhost/pK7z
-```
+    $ curl -X DELETE http://urlsparkhost/pK7z
 
 ...and the resource should cease to exist.
-
-### Dependencies
-
-The only dependency is on [redis](http://redis.io/) which works as its
-datastore. Redis seems to make the most sense due to the nature of the app
-(key, value, expiration) in addition to its blazing speed. Other datastores can
-be implemented but expiration might need to be added if not an inherent
-property of the backing datastore.
-
-The service expects the redis server to be running and reachable from the
-server to be able to perform its main operations.
-
-### TODO
-
-  * Think about implementing **single use URLs**
 
 ### License
 
