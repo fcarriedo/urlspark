@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/fcarriedo/urlspark.png?branch=master)](https://travis-ci.org/fcarriedo/urlspark)
+
 # urlspark
 
 Quick and dirty URL shortener that creates volatile (read *short lived*)
