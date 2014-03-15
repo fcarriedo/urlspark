@@ -1,4 +1,4 @@
-package main
+package store
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ func NewMemoryStore() *memStore {
 }
 
 // Persists the given URL and returns the unique ID that references it
-func (db *memStore) persist(longURL string, ttl int) (string, error) {
+func (db *memStore) Persist(longURL string, ttl int) (string, error) {
 	db.Lock()
 	defer db.Unlock()
 
@@ -29,7 +29,7 @@ func (db *memStore) persist(longURL string, ttl int) (string, error) {
 			// launch the expiration routine
 			go func() {
 				<-time.After(time.Duration(ttl) * time.Second)
-				db.del(id)
+				db.Del(id)
 			}()
 
 			return id, nil
@@ -39,7 +39,7 @@ func (db *memStore) persist(longURL string, ttl int) (string, error) {
 	return "", fmt.Errorf("Could not store %s", longURL)
 }
 
-func (db *memStore) get(id string) (string, error) {
+func (db *memStore) Get(id string) (string, error) {
 	db.RLock()
 	defer db.RUnlock()
 
@@ -51,7 +51,7 @@ func (db *memStore) get(id string) (string, error) {
 	return url, nil
 }
 
-func (db *memStore) del(id string) error {
+func (db *memStore) Del(id string) error {
 	db.Lock()
 	defer db.Unlock()
 

@@ -1,21 +1,22 @@
-package main
+package store
 
-import (
-	"crypto/rand"
-)
+import "crypto/rand"
 
 const alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 const idLen = 4
 
 // The interface definition for the URL datastore
-type urlStore interface {
+type UrlStore interface {
+
 	// Persist the given URL for the given amount of sec and returns the stored
 	// URL identifier
-	persist(longUrl string, ttl int) (string, error)
+	Persist(longUrl string, ttl int) (string, error)
+
 	// Gets the stored URL given the identifier
-	get(id string) (string, error)
+	Get(id string) (string, error)
+
 	// Deletes the URL given the identifier
-	del(id string) error
+	Del(id string) error
 }
 
 // Generates a random ID of the given length

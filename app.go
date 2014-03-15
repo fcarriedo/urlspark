@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/fcarriedo/urlspark/store"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -14,18 +15,19 @@ var (
 	redisAddr = flag.String("redis", "", "redis address 'host:port'")
 )
 
-var store urlStore
+// Our URL datastore
+var ds store.UrlStore
 
 func init() {
 	if *redisAddr != "" {
-		// If redis param given, init the store with it.
+		// If redis param given, init the datastore with it.
 		var err error
-		if store, err = NewRedisStore(*redisAddr); err != nil {
+		if ds, err = store.NewRedisStore(*redisAddr); err != nil {
 			// Fail fast if no datastore at startup
 			log.Fatal(err)
 		}
 	} else {
-		store = NewMemoryStore()
+		ds = store.NewMemoryStore()
 	}
 }
 
@@ -40,7 +42,7 @@ func creationHandler(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		id, err := store.persist(url, *ttl)
+		id, err := ds.Persist(url, *ttl)
 		if err != nil {
 			log.Println(err)
 			http.Error(w, "The server experienced an error", http.StatusInternalServerError)
@@ -58,14 +60,14 @@ func redirectHandler(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
 	switch req.Method {
 	case "GET":
-		url, err := store.get(id)
+		url, err := ds.Get(id)
 		if err != nil {
 			http.Error(w, "The requested URL has expired and/or does not exist", http.StatusNotFound)
 			return
 		}
 		http.Redirect(w, req, url, http.StatusFound)
 	case "DELETE":
-		store.del(id)
+		ds.Del(id)
 	default:
 		handleErr(w, http.StatusMethodNotAllowed)
 	}

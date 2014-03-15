@@ -1,4 +1,4 @@
-package main
+package store
 
 import (
 	"fmt"
@@ -40,7 +40,7 @@ func NewRedisStore(addr string) (*redisStore, error) {
 }
 
 // Persists the given URL and returns the unique ID that references it
-func (s *redisStore) persist(longURL string, ttl int) (string, error) {
+func (s *redisStore) Persist(longURL string, ttl int) (string, error) {
 	for {
 		conn := s.pool.Get()
 		defer conn.Close()
@@ -61,14 +61,14 @@ func (s *redisStore) persist(longURL string, ttl int) (string, error) {
 	}
 }
 
-func (s *redisStore) get(id string) (string, error) {
+func (s *redisStore) Get(id string) (string, error) {
 	conn := s.pool.Get()
 	defer conn.Close()
 
 	return redis.String(conn.Do("GET", id))
 }
 
-func (s *redisStore) del(id string) error {
+func (s *redisStore) Del(id string) error {
 	conn := s.pool.Get()
 	defer conn.Close()
 

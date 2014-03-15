@@ -1,4 +1,4 @@
-package main
+package store
 
 import (
 	"testing"
@@ -13,7 +13,7 @@ func TestPersist(t *testing.T) {
 	totalEntries := 1000
 	for i := 0; i < totalEntries; i++ {
 		longUrl := urlPrefix + string(i)
-		if _, err := store.persist(longUrl, 1); err != nil {
+		if _, err := store.Persist(longUrl, 1); err != nil {
 			t.Errorf("%s (error) while persisting: %s", err, longUrl)
 		}
 	}
@@ -45,9 +45,9 @@ func TestGet(t *testing.T) {
 	for i := 0; i < 25; i++ {
 		longUrl := urlPrefix + string(i)
 
-		id, _ := store.persist(longUrl, 5)
+		id, _ := store.Persist(longUrl, 5)
 
-		url, _ := store.get(id)
+		url, _ := store.Get(id)
 
 		if url != longUrl {
 			t.Errorf("Expected '%s' but got '%s' using ID: %s", longUrl, url, id)
@@ -59,11 +59,11 @@ func TestDelete(t *testing.T) {
 	store := NewMemoryStore()
 
 	longUrl := urlPrefix + "1"
-	id, _ := store.persist(longUrl, 5)
+	id, _ := store.Persist(longUrl, 5)
 
-	store.del(id)
+	store.Del(id)
 
-	if url, _ := store.get(id); url != "" {
+	if url, _ := store.Get(id); url != "" {
 		t.Errorf("The URL should not exist after deletion.")
 	}
 }
