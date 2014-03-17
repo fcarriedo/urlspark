@@ -90,3 +90,19 @@ func BenchmarkGet(b *testing.B) {
 		store.Get(id)
 	}
 }
+
+func BenchmarkDelete(b *testing.B) {
+	store := NewMemoryStore()
+
+	ids := make([]string, 1000)
+	for i := 0; i < b.N; i++ {
+		longUrl := urlPrefix + string(i)
+		id, _ := store.Persist(longUrl, 200)
+		ids = append(ids, id)
+	}
+
+	b.ResetTimer()
+	for _, id := range ids {
+		store.Del(id)
+	}
+}
