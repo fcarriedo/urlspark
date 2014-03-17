@@ -67,3 +67,24 @@ func TestDelete(t *testing.T) {
 		t.Errorf("The URL should not exist after deletion.")
 	}
 }
+
+// Benchmark tests
+
+func BenchmarkPersist(b *testing.B) {
+	store := NewMemoryStore()
+	for i := 0; i < b.N; i++ {
+		longUrl := urlPrefix + string(i)
+		store.Persist(longUrl, 1)
+	}
+}
+
+func BenchmarkGet(b *testing.B) {
+	store := NewMemoryStore()
+
+	longUrl := urlPrefix + "1"
+	id, _ := store.Persist(longUrl, 200)
+
+	for i := 0; i < b.N; i++ {
+		store.Get(id)
+	}
+}
