@@ -10,3 +10,10 @@ func TestRandIdGeneration(t *testing.T) {
 		}
 	}
 }
+
+// Benchmark the random generation
+func BenchmarkRandIdGeneration(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		genRandID(idLen)
+	}
+}
