@@ -72,8 +72,10 @@ func TestDelete(t *testing.T) {
 
 func BenchmarkPersist(b *testing.B) {
 	store := NewMemoryStore()
+
+	longUrl := urlPrefix + "1"
+
 	for i := 0; i < b.N; i++ {
-		longUrl := urlPrefix + string(i)
 		store.Persist(longUrl, 1)
 	}
 }
